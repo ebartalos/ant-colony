@@ -9,23 +9,28 @@ class Simulation(private val sideLength: Int) {
 //        get() = 50L / ants.size
     private val delay: Long = 1L
 
-    private var appleLocationX: Int = 60
-    private var appleLocationY: Int = 10
+    private var appleLocationX: Int = 40
+    private var appleLocationY: Int = 20
+
+    private var lairLocationX:Int = 15
+    private var lairLocationY:Int = 15
+
     private val emptyMark = 0
     private val wallMark = 1
     private val antMark = 2
     private val appleMark = 3
+    private val lairMark = 4
 
     private val ants = arrayListOf<Ant>()
-    private val pheromoneMapSearching = Array(sideLength) { Array(sideLength) { 0 } }
-    private val pheromoneMapReturning = Array(sideLength) { Array(sideLength) { 0 } }
+    private val pheromoneMapSearching = Array(sideLength) { Array(sideLength) { 1 } }
+    private val pheromoneMapReturning = Array(sideLength) { Array(sideLength) { 1 } }
 
 
     init {
         drawWalls()
 
-        for (i in 0..500) {
-            ants.add(Ant())
+        for (i in 1..100) {
+            ants.add(Ant(Pair(lairLocationX,lairLocationY)))
         }
 
         updateBoard()
@@ -59,30 +64,27 @@ class Simulation(private val sideLength: Int) {
 
                 if (ant.positionX == appleLocationX && ant.positionY == appleLocationY && ant.pheromone == Ant.Pheromone.SEARCHING) {
                     ant.switchPheromones()
-                } else if (ant.positionX == 30 && ant.positionY == 30 && ant.pheromone == Ant.Pheromone.RETURNING) {
+                } else if (ant.positionX == lairLocationX && ant.positionY == lairLocationY && ant.pheromone == Ant.Pheromone.RETURNING) {
                     ant.switchPheromones()
                 }
 
                 ant.move(availableSquares, pheromoneMapSearching, pheromoneMapReturning)
-
-
-                increasePheromoneLevel(ant)
-
                 updateBoard()
             }
             gui.update(boardState)
             Thread.sleep(delay)
 
+            ants.forEach { ant -> increasePheromoneLevel(ant) }
 
             // decrease pheromones
             pheromoneMapSearching.forEachIndexed { x, innerArray ->
                 innerArray.forEachIndexed { y, pheromone ->
-                    if (pheromone > 0) pheromoneMapSearching[x][y] -= 1
+                    if (pheromone > 1) pheromoneMapSearching[x][y] -= 1
                 }
             }
             pheromoneMapReturning.forEachIndexed { x, innerArray ->
                 innerArray.forEachIndexed { y, pheromone ->
-                    if (pheromone > 0) pheromoneMapSearching[x][y] -= 1
+                    if (pheromone > 1) pheromoneMapReturning[x][y] -= 1
                 }
             }
         }
@@ -92,9 +94,9 @@ class Simulation(private val sideLength: Int) {
 
     private fun increasePheromoneLevel(ant: Ant) {
         if (ant.pheromone == Ant.Pheromone.SEARCHING) {
-            pheromoneMapSearching[ant.positionX][ant.positionY] += 100
+            pheromoneMapSearching[ant.positionX][ant.positionY] += 30
         } else {
-            pheromoneMapReturning[ant.positionX][ant.positionY] += 10
+            pheromoneMapReturning[ant.positionX][ant.positionY] += 30
         }
     }
 
@@ -128,5 +130,6 @@ class Simulation(private val sideLength: Int) {
             boardState[ant.positionX][ant.positionY] = antMark
         }
         boardState[appleLocationX][appleLocationY] = appleMark
+        boardState[lairLocationX][lairLocationY] = lairMark
     }
 }

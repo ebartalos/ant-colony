@@ -15,6 +15,8 @@ class Board(private var boardState: Array<Array<Int>>) : JPanel() {
     private var appleIcon: Image? = null
     private var antIcon: Image? = null
     private var wallIcon: Image? = null
+    private var lairIcon: Image? = null
+
 
     init {
         background = Color.black
@@ -35,6 +37,9 @@ class Board(private var boardState: Array<Array<Int>>) : JPanel() {
         wallIcon = ImageIcon("src/main/resources/wall.png")
             .image
             .getScaledInstance(dotSize, dotSize, Image.SCALE_SMOOTH)
+        lairIcon = ImageIcon("src/main/resources/lair.png")
+            .image
+            .getScaledInstance(dotSize, dotSize, Image.SCALE_SMOOTH)
     }
 
     public override fun paintComponent(g: Graphics) {
@@ -45,6 +50,8 @@ class Board(private var boardState: Array<Array<Int>>) : JPanel() {
         iconsMap[1] = wallIcon
         iconsMap[2] = antIcon
         iconsMap[3] = appleIcon
+        iconsMap[4] = lairIcon
+
 
         for (x in 0 until sideLength) {
             for (y in 0 until sideLength) {

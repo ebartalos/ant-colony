@@ -1,13 +1,13 @@
 import kotlin.random.Random
 
-class Ant {
+class Ant(spawnPoint:Pair<Int,Int>) {
 
     enum class Pheromone {
         SEARCHING, RETURNING
     }
 
-    var positionX: Int = 40
-    var positionY: Int = 40
+    var positionX: Int = spawnPoint.first
+    var positionY: Int = spawnPoint.second
 
     var pheromone: Pheromone = Pheromone.SEARCHING
 
@@ -36,11 +36,6 @@ class Ant {
             availableSquares[square] = total
         }
 
-        if (total <= 0.0) {
-            val spot = availableSquares.keys.random()
-            positionX = spot[0]
-            positionY = spot[1]
-        } else {
             val selector = Random.nextDouble(total)
             val result = availableSquares.reversed().toSortedMap()
 
@@ -48,7 +43,7 @@ class Ant {
                 if (selector <= chance) {
                     positionX = spot[0]
                     positionY = spot[1]
-                }
+                    break
             }
         }
 
