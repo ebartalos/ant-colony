@@ -7,10 +7,10 @@ class Simulation(private val sideLength: Int) {
 
     //        private val delay: Long
 //        get() = 50L / ants.size
-    private val delay: Long = 1L
+    private val delay: Long = 3L
 
     private var appleLocationX: Int = 40
-    private var appleLocationY: Int = 20
+    private var appleLocationY: Int = 40
 
     private var lairLocationX: Int = 15
     private var lairLocationY: Int = 15
@@ -29,7 +29,7 @@ class Simulation(private val sideLength: Int) {
     init {
         drawWalls()
 
-        for (i in 1..100) {
+        for (i in 1..Constants.MAX_ANTS) {
             ants.add(Ant(Pair(lairLocationX, lairLocationY)))
         }
 
@@ -42,16 +42,11 @@ class Simulation(private val sideLength: Int) {
 
         while (true) {
             ants.forEach { ant ->
-                if (ant.positionX == appleLocationX && ant.positionY == appleLocationY) {
+                if ((ant.positionX == appleLocationX && ant.positionY == appleLocationY && ant.pheromone == Ant.Pheromone.SEARCHING)
+                    || (ant.positionX == lairLocationX && ant.positionY == lairLocationY && ant.pheromone == Ant.Pheromone.RETURNING)
+                ) {
                     ant.fillPheromoneLevel()
-                    if (ant.pheromone == Ant.Pheromone.SEARCHING) {
-                        ant.switchPheromones()
-                    }
-                } else if (ant.positionX == lairLocationX && ant.positionY == lairLocationY) {
-                    ant.fillPheromoneLevel()
-                    if (ant.pheromone == Ant.Pheromone.RETURNING) {
-                        ant.switchPheromones()
-                    }
+                    ant.switchPheromones()
                 }
 
                 ant.move(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
@@ -62,7 +57,7 @@ class Simulation(private val sideLength: Int) {
 
             ants.forEach { ant -> increasePheromoneLevel(ant) }
 
-            decreasePheromones()
+//            decreasePheromones()
         }
 
 //        gui.quit()

@@ -11,7 +11,6 @@ class Ant(spawnPoint: Pair<Int, Int>) {
 
     var pheromone: Pheromone = Pheromone.SEARCHING
     var pheromoneLevel: Int = 0
-    private val maxPheromoneLevel = 300
 
     init {
         fillPheromoneLevel()
@@ -56,7 +55,7 @@ class Ant(spawnPoint: Pair<Int, Int>) {
     }
 
     fun fillPheromoneLevel() {
-        pheromoneLevel = maxPheromoneLevel
+        pheromoneLevel = Constants.MAX_PHEROMONE_LEVEL
     }
 
     private fun <K, V> Map<K, V>.reversed() = HashMap<V, K>().also { newMap ->
