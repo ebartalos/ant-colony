@@ -1,15 +1,14 @@
 package gui
 
 import Ant
-import kotlin.random.Random
 
 class Simulation(private val sideLength: Int) {
-    private val boardState = Array(sideLength) { Array(sideLength) { 0 } }
-    private val delay: Long = 50L
+    private val boardState = Array(sideLength) { Array(sideLength) { emptyMark } }
+    private val delay: Long
+        get() = 50L / ants.size
 
-    private var appleLocationX: Int = Random.nextInt(1, sideLength - 1)
-    private var appleLocationY: Int = Random.nextInt(1, sideLength - 1)
-
+    private var appleLocationX: Int = 10
+    private var appleLocationY: Int = 10
     private val emptyMark = 0
     private val wallMark = 1
     private val antMark = 2
@@ -32,19 +31,33 @@ class Simulation(private val sideLength: Int) {
         gui.isVisible = true
 
         while (true) {
-            ants.forEach {
-                it.moveRandomly()
+            ants.forEach { ant ->
+                val neighbors = mutableMapOf(
+                    Pair(ant.positionX - 1, ant.positionX - 1) to 1.0,
+                    Pair(ant.positionX - 1, ant.positionX) to 1.0,
+                    Pair(ant.positionX - 1, ant.positionX + 1) to 1.0,
+                    Pair(ant.positionX, ant.positionX - 1) to 1.0,
+                    Pair(ant.positionX, ant.positionX + 1) to 1.0,
+                    Pair(ant.positionX + 1, ant.positionX - 1) to 1.0,
+                    Pair(ant.positionX + 1, ant.positionX) to 1.0,
+                    Pair(ant.positionX + 1, ant.positionX + 1) to 1.0
+                )
+
+                for ((position, _) in neighbors) {
+                    if (boardState[position.first][position.second] == wallMark) {
+                        neighbors[position] = 0.0
+                    }
+                }
+
+
+                ant.move(neighbors.filterValues { it != 0.0 })
                 updateBoard()
                 gui.update(boardState)
                 Thread.sleep(delay)
             }
         }
 
-
-
-
 //        gui.quit()
-
     }
 
     private fun drawWalls() {
@@ -55,18 +68,6 @@ class Simulation(private val sideLength: Int) {
             boardState[index][sideLength - 1] = wallMark
         }
         boardState[sideLength / 2][sideLength / 2] = wallMark
-    }
-
-    /**
-     * Set random position for apple - O - that is inside of board.
-     */
-    private fun setRandomApplePosition() {
-        boardState[appleLocationX][appleLocationY] = emptyMark
-
-        appleLocationX = Random.nextInt(1, sideLength - 1)
-        appleLocationY = Random.nextInt(1, sideLength - 1)
-
-        updateBoard()
     }
 
     /**

@@ -6,7 +6,7 @@ import javax.swing.JPanel
 
 
 class Board(private var boardState: Array<Array<Int>>) : JPanel() {
-    private val dotSize = 25
+    private val dotSize = 5
     private val sideLength = boardState.size
 
     private val boardWidth = sideLength * dotSize
