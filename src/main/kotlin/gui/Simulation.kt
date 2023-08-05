@@ -12,8 +12,8 @@ class Simulation(private val sideLength: Int) {
     private var appleLocationX: Int = 40
     private var appleLocationY: Int = 20
 
-    private var lairLocationX:Int = 15
-    private var lairLocationY:Int = 15
+    private var lairLocationX: Int = 15
+    private var lairLocationY: Int = 15
 
     private val emptyMark = 0
     private val wallMark = 1
@@ -30,7 +30,7 @@ class Simulation(private val sideLength: Int) {
         drawWalls()
 
         for (i in 1..100) {
-            ants.add(Ant(Pair(lairLocationX,lairLocationY)))
+            ants.add(Ant(Pair(lairLocationX, lairLocationY)))
         }
 
         updateBoard()
@@ -42,33 +42,19 @@ class Simulation(private val sideLength: Int) {
 
         while (true) {
             ants.forEach { ant ->
-                var availableSquares = mutableMapOf(
-                    arrayOf(ant.positionX - 1, ant.positionY - 1) to 1.0,
-                    arrayOf(ant.positionX - 1, ant.positionY) to 1.0,
-                    arrayOf(ant.positionX - 1, ant.positionY + 1) to 1.0,
-                    arrayOf(ant.positionX, ant.positionY - 1) to 1.0,
-                    arrayOf(ant.positionX, ant.positionY + 1) to 1.0,
-                    arrayOf(ant.positionX + 1, ant.positionY - 1) to 1.0,
-                    arrayOf(ant.positionX + 1, ant.positionY) to 1.0,
-                    arrayOf(ant.positionX + 1, ant.positionY + 1) to 1.0
-                )
-
-                // remove walls from equation
-                for ((position, _) in availableSquares) {
-                    if (boardState[position[0]][position[1]] == wallMark) {
-                        availableSquares[position] = 0.0
+                if (ant.positionX == appleLocationX && ant.positionY == appleLocationY) {
+                    ant.fillPheromoneLevel()
+                    if (ant.pheromone == Ant.Pheromone.SEARCHING) {
+                        ant.switchPheromones()
+                    }
+                } else if (ant.positionX == lairLocationX && ant.positionY == lairLocationY) {
+                    ant.fillPheromoneLevel()
+                    if (ant.pheromone == Ant.Pheromone.RETURNING) {
+                        ant.switchPheromones()
                     }
                 }
-                availableSquares = availableSquares.filterValues { it != 0.0 } as MutableMap<Array<Int>, Double>
 
-
-                if (ant.positionX == appleLocationX && ant.positionY == appleLocationY && ant.pheromone == Ant.Pheromone.SEARCHING) {
-                    ant.switchPheromones()
-                } else if (ant.positionX == lairLocationX && ant.positionY == lairLocationY && ant.pheromone == Ant.Pheromone.RETURNING) {
-                    ant.switchPheromones()
-                }
-
-                ant.move(availableSquares, pheromoneMapSearching, pheromoneMapReturning)
+                ant.move(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
                 updateBoard()
             }
             gui.update(boardState)
@@ -76,27 +62,51 @@ class Simulation(private val sideLength: Int) {
 
             ants.forEach { ant -> increasePheromoneLevel(ant) }
 
-            // decrease pheromones
-            pheromoneMapSearching.forEachIndexed { x, innerArray ->
-                innerArray.forEachIndexed { y, pheromone ->
-                    if (pheromone > 1) pheromoneMapSearching[x][y] -= 1
-                }
-            }
-            pheromoneMapReturning.forEachIndexed { x, innerArray ->
-                innerArray.forEachIndexed { y, pheromone ->
-                    if (pheromone > 1) pheromoneMapReturning[x][y] -= 1
-                }
-            }
+            decreasePheromones()
         }
 
 //        gui.quit()
     }
 
+    private fun calculateAvailableSquares(ant: Ant): MutableMap<Array<Int>, Double> {
+        val availableSquares = mutableMapOf(
+            arrayOf(ant.positionX - 1, ant.positionY - 1) to 1.0,
+            arrayOf(ant.positionX - 1, ant.positionY) to 1.0,
+            arrayOf(ant.positionX - 1, ant.positionY + 1) to 1.0,
+            arrayOf(ant.positionX, ant.positionY - 1) to 1.0,
+            arrayOf(ant.positionX, ant.positionY + 1) to 1.0,
+            arrayOf(ant.positionX + 1, ant.positionY - 1) to 1.0,
+            arrayOf(ant.positionX + 1, ant.positionY) to 1.0,
+            arrayOf(ant.positionX + 1, ant.positionY + 1) to 1.0
+        )
+
+        // remove walls from equation
+        for ((position, _) in availableSquares) {
+            if (boardState[position[0]][position[1]] == wallMark) {
+                availableSquares[position] = 0.0
+            }
+        }
+        return availableSquares.filterValues { it != 0.0 } as MutableMap<Array<Int>, Double>
+    }
+
+    private fun decreasePheromones() {
+        pheromoneMapSearching.forEachIndexed { x, innerArray ->
+            innerArray.forEachIndexed { y, pheromone ->
+                if (pheromone > 1) pheromoneMapSearching[x][y] -= 1
+            }
+        }
+        pheromoneMapReturning.forEachIndexed { x, innerArray ->
+            innerArray.forEachIndexed { y, pheromone ->
+                if (pheromone > 1) pheromoneMapReturning[x][y] -= 1
+            }
+        }
+    }
+
     private fun increasePheromoneLevel(ant: Ant) {
         if (ant.pheromone == Ant.Pheromone.SEARCHING) {
-            pheromoneMapSearching[ant.positionX][ant.positionY] += 30
+            pheromoneMapSearching[ant.positionX][ant.positionY] += ant.pheromoneLevel
         } else {
-            pheromoneMapReturning[ant.positionX][ant.positionY] += 30
+            pheromoneMapReturning[ant.positionX][ant.positionY] += ant.pheromoneLevel
         }
     }
 

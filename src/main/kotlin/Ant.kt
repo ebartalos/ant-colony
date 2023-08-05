@@ -1,6 +1,6 @@
 import kotlin.random.Random
 
-class Ant(spawnPoint:Pair<Int,Int>) {
+class Ant(spawnPoint: Pair<Int, Int>) {
 
     enum class Pheromone {
         SEARCHING, RETURNING
@@ -10,6 +10,12 @@ class Ant(spawnPoint:Pair<Int,Int>) {
     var positionY: Int = spawnPoint.second
 
     var pheromone: Pheromone = Pheromone.SEARCHING
+    var pheromoneLevel: Int = 0
+    private val maxPheromoneLevel = 300
+
+    init {
+        fillPheromoneLevel()
+    }
 
     fun switchPheromones() {
         pheromone = if (pheromone == Pheromone.SEARCHING) {
@@ -36,17 +42,21 @@ class Ant(spawnPoint:Pair<Int,Int>) {
             availableSquares[square] = total
         }
 
-            val selector = Random.nextDouble(total)
-            val result = availableSquares.reversed().toSortedMap()
+        val selector = Random.nextDouble(total)
+        val result = availableSquares.reversed().toSortedMap()
 
-            for ((chance, spot) in result) {
-                if (selector <= chance) {
-                    positionX = spot[0]
-                    positionY = spot[1]
-                    break
+        for ((chance, spot) in result) {
+            if (selector <= chance) {
+                positionX = spot[0]
+                positionY = spot[1]
+                break
             }
         }
+        if (pheromoneLevel > 0) pheromoneLevel -= 1
+    }
 
+    fun fillPheromoneLevel() {
+        pheromoneLevel = maxPheromoneLevel
     }
 
     private fun <K, V> Map<K, V>.reversed() = HashMap<V, K>().also { newMap ->
