@@ -2,10 +2,12 @@ package gui
 
 import Ant
 import Constants
+import kotlin.math.max
+import kotlin.random.Random
 
 class Simulation(private val sideLength: Int) {
     private val boardState = Array(sideLength) { Array(sideLength) { emptyMark } }
-    private val delay: Long = 10L
+    private val delay: Long = 1L
 
     private var appleLocationX: Int = 40
     private var appleLocationY: Int = 40
@@ -42,9 +44,14 @@ class Simulation(private val sideLength: Int) {
 
         while (true) {
             ants.forEach { ant ->
+                if (Random.nextInt() % 10 == 1) {
+                    ant.move(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
+                } else {
+                    ant.moveByMax(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
+                }
 
+                ant.decreasePheromoneProduction()
 
-                ant.move(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
                 updateBoard()
 
                 if ((isAppleEaten(ant) && ant.pheromone == Ant.Pheromone.SEARCHING)
@@ -67,15 +74,7 @@ class Simulation(private val sideLength: Int) {
 
     private fun isAppleEaten(ant: Ant): Boolean {
         val location = arrayListOf<Pair<Int, Int>>(
-            Pair(appleLocationX - 1, appleLocationY - 1),
-            Pair(appleLocationX - 1, appleLocationY),
-            Pair(appleLocationX - 1, appleLocationY + 1),
-            Pair(appleLocationX, appleLocationY - 1),
             Pair(appleLocationX, appleLocationY),
-            Pair(appleLocationX, appleLocationY + 1),
-            Pair(appleLocationX + 1, appleLocationY - 1),
-            Pair(appleLocationX + 1, appleLocationY),
-            Pair(appleLocationX + 1, appleLocationY + 1),
         )
 
 
@@ -123,9 +122,11 @@ class Simulation(private val sideLength: Int) {
 
     private fun increasePheromoneLevel(ant: Ant) {
         if (ant.pheromone == Ant.Pheromone.SEARCHING) {
-            pheromoneMapSearching[ant.positionX][ant.positionY] += ant.pheromoneLevel
+            pheromoneMapSearching[ant.positionX][ant.positionY] =
+                max(ant.pheromoneLevel, pheromoneMapSearching[ant.positionX][ant.positionY])
         } else {
-            pheromoneMapReturning[ant.positionX][ant.positionY] += ant.pheromoneLevel
+            pheromoneMapReturning[ant.positionX][ant.positionY] =
+                max(ant.pheromoneLevel, pheromoneMapReturning[ant.positionX][ant.positionY])
         }
     }
 
@@ -164,17 +165,8 @@ class Simulation(private val sideLength: Int) {
         boardState[55][45] = wallMark
     }
 
-    // todo refactor to avoid hardcoding
     private fun drawApples() {
         boardState[appleLocationX][appleLocationY] = appleMark
-        boardState[appleLocationX - 1][appleLocationY - 1] = appleMark
-        boardState[appleLocationX - 1][appleLocationY] = appleMark
-        boardState[appleLocationX - 1][appleLocationY + 1] = appleMark
-        boardState[appleLocationX][appleLocationY - 1] = appleMark
-        boardState[appleLocationX][appleLocationY + 1] = appleMark
-        boardState[appleLocationX + 1][appleLocationY - 1] = appleMark
-        boardState[appleLocationX + 1][appleLocationY] = appleMark
-        boardState[appleLocationX + 1][appleLocationY + 1] = appleMark
     }
 
     /**
