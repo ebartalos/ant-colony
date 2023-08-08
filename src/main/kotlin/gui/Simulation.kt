@@ -9,8 +9,8 @@ class Simulation(private val sideLength: Int) {
     private val boardState = Array(sideLength) { Array(sideLength) { emptyMark } }
     private val delay: Long = 1L
 
-    private var appleLocationX: Int = 40
-    private var appleLocationY: Int = 40
+    private var appleLocationX: Int = 20
+    private var appleLocationY: Int = 20
 
     private var lairLocationX: Int = 47
     private var lairLocationY: Int = 47
@@ -44,8 +44,9 @@ class Simulation(private val sideLength: Int) {
 
         while (true) {
             ants.forEach { ant ->
-                if (Random.nextInt() % 10 == 1) {
-                    ant.move(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
+                if (Random.nextInt() % 20 == 1) {
+//                    ant.move(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
+                    ant.moveRandomly(calculateAvailableSquares(ant))
                 } else {
                     ant.moveByMax(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
                 }
@@ -88,14 +89,14 @@ class Simulation(private val sideLength: Int) {
 
     private fun calculateAvailableSquares(ant: Ant): MutableMap<Array<Int>, Double> {
         val availableSquares = mutableMapOf(
-            arrayOf(ant.positionX - 1, ant.positionY - 1) to 1.0,
+//            arrayOf(ant.positionX - 1, ant.positionY - 1) to 1.0,
             arrayOf(ant.positionX - 1, ant.positionY) to 1.0,
-            arrayOf(ant.positionX - 1, ant.positionY + 1) to 1.0,
+//            arrayOf(ant.positionX - 1, ant.positionY + 1) to 1.0,
             arrayOf(ant.positionX, ant.positionY - 1) to 1.0,
             arrayOf(ant.positionX, ant.positionY + 1) to 1.0,
-            arrayOf(ant.positionX + 1, ant.positionY - 1) to 1.0,
+//            arrayOf(ant.positionX + 1, ant.positionY - 1) to 1.0,
             arrayOf(ant.positionX + 1, ant.positionY) to 1.0,
-            arrayOf(ant.positionX + 1, ant.positionY + 1) to 1.0
+//            arrayOf(ant.positionX + 1, ant.positionY + 1) to 1.0
         )
 
         // remove walls from equation
@@ -150,7 +151,13 @@ class Simulation(private val sideLength: Int) {
         boardState[44][53] = wallMark
         boardState[44][54] = wallMark
         boardState[44][55] = wallMark
-
+        boardState[45][55] = wallMark
+        boardState[46][55] = wallMark
+        boardState[47][55] = wallMark
+        boardState[48][55] = wallMark
+        boardState[49][55] = wallMark
+        boardState[50][55] = wallMark
+        boardState[51][55] = wallMark
 
 
         boardState[46][45] = wallMark
@@ -163,6 +170,14 @@ class Simulation(private val sideLength: Int) {
         boardState[53][45] = wallMark
         boardState[54][45] = wallMark
         boardState[55][45] = wallMark
+        boardState[55][46] = wallMark
+        boardState[55][47] = wallMark
+        boardState[55][48] = wallMark
+        boardState[55][49] = wallMark
+        boardState[55][50] = wallMark
+        boardState[55][51] = wallMark
+
+
     }
 
     private fun drawApples() {

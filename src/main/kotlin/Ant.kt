@@ -79,6 +79,13 @@ class Ant(spawnPoint: Pair<Int, Int>) {
         positionY = spot[1]
     }
 
+    fun moveRandomly(availableSquares: MutableMap<Array<Int>, Double>) {
+        val spot = availableSquares.keys.random()
+
+        positionX = spot[0]
+        positionY = spot[1]
+    }
+
     fun decreasePheromoneProduction() {
         if (pheromoneLevel >= Constants.ANT_PHEROMONE_WEAKENING_RATE) {
             pheromoneLevel -= Constants.ANT_PHEROMONE_WEAKENING_RATE

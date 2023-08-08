@@ -29,7 +29,7 @@ class Board(private var boardState: Array<Array<Int>>) : JPanel() {
     }
 
     private fun loadImages() {
-        antSearchingIcon = ImageIcon("src/main/resources/head.png")
+        antSearchingIcon = ImageIcon("src/main/resources/ant_searching.png")
             .image
             .getScaledInstance(dotSize, dotSize, Image.SCALE_SMOOTH)
         antReturningIcon = ImageIcon("src/main/resources/ant_returning.png")
@@ -56,8 +56,6 @@ class Board(private var boardState: Array<Array<Int>>) : JPanel() {
         iconsMap[3] = appleIcon
         iconsMap[4] = lairIcon
         iconsMap[5] = antReturningIcon
-
-
 
         for (x in 0 until sideLength) {
             for (y in 0 until sideLength) {
