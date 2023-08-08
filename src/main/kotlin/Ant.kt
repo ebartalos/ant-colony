@@ -51,7 +51,11 @@ class Ant(spawnPoint: Pair<Int, Int>) {
                 break
             }
         }
-        if (pheromoneLevel > 0) pheromoneLevel -= 1
+        if (pheromoneLevel >= Constants.ANT_PHEROMONE_WEAKENING_RATE) {
+            pheromoneLevel -= Constants.ANT_PHEROMONE_WEAKENING_RATE
+        } else {
+            pheromoneLevel = 1
+        }
     }
 
     fun fillPheromoneLevel() {

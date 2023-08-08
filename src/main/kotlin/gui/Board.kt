@@ -6,14 +6,15 @@ import javax.swing.JPanel
 
 
 class Board(private var boardState: Array<Array<Int>>) : JPanel() {
-    private val dotSize = 10
+    private val dotSize = 5
     private val sideLength = boardState.size
 
     private val boardWidth = sideLength * dotSize
     private val boardHeight = sideLength * dotSize
 
     private var appleIcon: Image? = null
-    private var antIcon: Image? = null
+    private var antSearchingIcon: Image? = null
+    private var antReturningIcon: Image? = null
     private var wallIcon: Image? = null
     private var lairIcon: Image? = null
 
@@ -28,7 +29,10 @@ class Board(private var boardState: Array<Array<Int>>) : JPanel() {
     }
 
     private fun loadImages() {
-        antIcon = ImageIcon("src/main/resources/head.png")
+        antSearchingIcon = ImageIcon("src/main/resources/head.png")
+            .image
+            .getScaledInstance(dotSize, dotSize, Image.SCALE_SMOOTH)
+        antReturningIcon = ImageIcon("src/main/resources/ant_returning.png")
             .image
             .getScaledInstance(dotSize, dotSize, Image.SCALE_SMOOTH)
         appleIcon = ImageIcon("src/main/resources/apple.png")
@@ -48,9 +52,11 @@ class Board(private var boardState: Array<Array<Int>>) : JPanel() {
         val iconsMap = HashMap<Int, Image?>()
         iconsMap[0] = null
         iconsMap[1] = wallIcon
-        iconsMap[2] = antIcon
+        iconsMap[2] = antSearchingIcon
         iconsMap[3] = appleIcon
         iconsMap[4] = lairIcon
+        iconsMap[5] = antReturningIcon
+
 
 
         for (x in 0 until sideLength) {
