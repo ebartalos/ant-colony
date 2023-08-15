@@ -38,28 +38,33 @@ class Simulation(private val sideLength: Int) {
         updateBoard()
     }
 
+    /**
+     * Play the ant colony simulation.
+     */
     fun play() {
         val gui = GUI(boardState)
         gui.isVisible = true
 
         while (true) {
             ants.forEach { ant ->
-                if (Random.nextInt() % 20 == 1) {
-//                    ant.move(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
+                if (Random.nextInt() % 10 == 1) {
                     ant.moveRandomly(calculateAvailableSquares(ant))
                 } else {
-                    ant.moveByMax(calculateAvailableSquares(ant), pheromoneMapSearching, pheromoneMapReturning)
+                    ant.move(
+                        calculateAvailableSquares(ant),
+                        if (ant.isSearching()) pheromoneMapReturning else pheromoneMapSearching
+                    )
                 }
 
                 ant.decreasePheromoneProduction()
 
                 updateBoard()
 
-                if ((isAppleEaten(ant) && ant.pheromone == Ant.Pheromone.SEARCHING)
-                    || (ant.positionX == lairLocationX && ant.positionY == lairLocationY && (ant.pheromone == Ant.Pheromone.RETURNING))
+                if ((isAppleEaten(ant) && ant.isSearching())
+                    || (ant.positionX == lairLocationX && ant.positionY == lairLocationY && ant.isReturning())
                 ) {
                     ant.fillPheromoneLevel()
-                    ant.switchPheromones()
+                    ant.swapPheromone()
                 }
             }
             gui.update(boardState)
@@ -69,15 +74,12 @@ class Simulation(private val sideLength: Int) {
 
             evaporate()
         }
-
-//        gui.quit()
     }
 
     private fun isAppleEaten(ant: Ant): Boolean {
-        val location = arrayListOf<Pair<Int, Int>>(
+        val location = arrayListOf(
             Pair(appleLocationX, appleLocationY),
         )
-
 
         for (spot in location) {
             if (ant.positionX == spot.first && ant.positionY == spot.second) {
@@ -89,17 +91,20 @@ class Simulation(private val sideLength: Int) {
 
     private fun calculateAvailableSquares(ant: Ant): MutableMap<Array<Int>, Double> {
         val availableSquares = mutableMapOf(
-//            arrayOf(ant.positionX - 1, ant.positionY - 1) to 1.0,
             arrayOf(ant.positionX - 1, ant.positionY) to 1.0,
-//            arrayOf(ant.positionX - 1, ant.positionY + 1) to 1.0,
             arrayOf(ant.positionX, ant.positionY - 1) to 1.0,
             arrayOf(ant.positionX, ant.positionY + 1) to 1.0,
-//            arrayOf(ant.positionX + 1, ant.positionY - 1) to 1.0,
             arrayOf(ant.positionX + 1, ant.positionY) to 1.0,
-//            arrayOf(ant.positionX + 1, ant.positionY + 1) to 1.0
         )
 
-        // remove walls from equation
+        if (Constants.EIGHT_DIMENSIONAL_MOVEMENT) {
+            availableSquares[arrayOf(ant.positionX - 1, ant.positionY - 1)] = 1.0
+            availableSquares[arrayOf(ant.positionX - 1, ant.positionY + 1)] = 1.0
+            availableSquares[arrayOf(ant.positionX + 1, ant.positionY - 1)] = 1.0
+            availableSquares[arrayOf(ant.positionX + 1, ant.positionY + 1)] = 1.0
+        }
+
+        // remove walls from the equation
         for ((position, _) in availableSquares) {
             if (boardState[position[0]][position[1]] == wallMark) {
                 availableSquares[position] = 0.0
@@ -159,7 +164,6 @@ class Simulation(private val sideLength: Int) {
         boardState[50][55] = wallMark
         boardState[51][55] = wallMark
 
-
         boardState[46][45] = wallMark
         boardState[47][45] = wallMark
         boardState[48][45] = wallMark
@@ -176,8 +180,6 @@ class Simulation(private val sideLength: Int) {
         boardState[55][49] = wallMark
         boardState[55][50] = wallMark
         boardState[55][51] = wallMark
-
-
     }
 
     private fun drawApples() {

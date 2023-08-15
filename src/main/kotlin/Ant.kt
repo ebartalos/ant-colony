@@ -1,5 +1,3 @@
-import kotlin.random.Random
-
 class Ant(spawnPoint: Pair<Int, Int>) {
 
     enum class Pheromone {
@@ -16,7 +14,10 @@ class Ant(spawnPoint: Pair<Int, Int>) {
         fillPheromoneLevel()
     }
 
-    fun switchPheromones() {
+    /**
+     * Swap pheromones between each other.
+     */
+    fun swapPheromone() {
         pheromone = if (pheromone == Pheromone.SEARCHING) {
             Pheromone.RETURNING
         } else {
@@ -24,49 +25,18 @@ class Ant(spawnPoint: Pair<Int, Int>) {
         }
     }
 
+    /**
+     * Move to available spot with the highest attractive pheromone level.
+     *
+     * @param availableSquares map of available spots
+     * @param pheromoneMap map of attractive pheromone levels
+     */
     fun move(
         availableSquares: MutableMap<Array<Int>, Double>,
-        pheromoneMapSearching: Array<Array<Int>>,
-        pheromoneMapReturning: Array<Array<Int>>
+        pheromoneMap: Array<Array<Int>>
     ) {
-        val pheromoneTrail = if (isSearching()) {
-            pheromoneMapReturning
-        } else {
-            pheromoneMapSearching
-        }
-
-        var total = 0.0
         for (square in availableSquares.keys) {
-            total += pheromoneTrail[square[0]][square[1]]
-            availableSquares[square] = total
-        }
-
-        val selector = Random.nextDouble(total)
-        val result = availableSquares.reversed().toSortedMap()
-
-        for ((chance, spot) in result) {
-            if (selector <= chance) {
-                positionX = spot[0]
-                positionY = spot[1]
-                break
-            }
-        }
-    }
-
-    fun moveByMax(
-        availableSquares: MutableMap<Array<Int>, Double>,
-        pheromoneMapSearching: Array<Array<Int>>,
-        pheromoneMapReturning: Array<Array<Int>>
-    ) {
-        val pheromoneTrail = if (isSearching()) {
-            pheromoneMapReturning
-        } else {
-            pheromoneMapSearching
-        }
-
-
-        for (square in availableSquares.keys) {
-            availableSquares[square] = pheromoneTrail[square[0]][square[1]].toDouble()
+            availableSquares[square] = pheromoneMap[square[0]][square[1]].toDouble()
         }
 
         val spot = if (availableSquares.values.all { it == 1.0 }) {
@@ -79,6 +49,11 @@ class Ant(spawnPoint: Pair<Int, Int>) {
         positionY = spot[1]
     }
 
+    /**
+     * Move to a random available spot.
+     *
+     * @param availableSquares map of available spots
+     */
     fun moveRandomly(availableSquares: MutableMap<Array<Int>, Double>) {
         val spot = availableSquares.keys.random()
 
@@ -86,6 +61,9 @@ class Ant(spawnPoint: Pair<Int, Int>) {
         positionY = spot[1]
     }
 
+    /**
+     * Weaken pheromone level by Constants.ANT_PHEROMONE_WEAKENING_RATE
+     */
     fun decreasePheromoneProduction() {
         if (pheromoneLevel >= Constants.ANT_PHEROMONE_WEAKENING_RATE) {
             pheromoneLevel -= Constants.ANT_PHEROMONE_WEAKENING_RATE
@@ -94,15 +72,24 @@ class Ant(spawnPoint: Pair<Int, Int>) {
         }
     }
 
+    /**
+     * Fill pheromone level to the Constants.MAX_PHEROMONE_LEVEL
+     */
     fun fillPheromoneLevel() {
         pheromoneLevel = Constants.MAX_PHEROMONE_LEVEL
     }
 
-    private fun isSearching(): Boolean {
+    /**
+     * Return true if ant is searching for food
+     */
+    fun isSearching(): Boolean {
         return pheromone == Pheromone.SEARCHING
     }
 
-    private fun <K, V> Map<K, V>.reversed() = HashMap<V, K>().also { newMap ->
-        entries.forEach { newMap[it.value] = it.key }
+    /**
+     * Return true if ant is searching for home
+     */
+    fun isReturning(): Boolean {
+        return pheromone == Pheromone.RETURNING
     }
 }
