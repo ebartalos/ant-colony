@@ -1,7 +1,4 @@
-package gui
-
-import Ant
-import Constants
+import gui.GUI
 import kotlin.math.max
 import kotlin.random.Random
 
@@ -9,8 +6,9 @@ class Simulation(private val sideLength: Int) {
     private val boardState = Array(sideLength) { Array(sideLength) { emptyMark } }
     private val delay: Long = 1L
 
-    private var appleLocationX: Int = 20
-    private var appleLocationY: Int = 20
+    private var appleLocations: ArrayList<Pair<Int, Int>> =
+        arrayListOf(Pair(20, 20), Pair(21, 20), Pair(22, 20), Pair(20, 21), Pair(20, 22), Pair(23, 20), Pair(21, 21),
+            Pair(21, 40), Pair(21, 41), Pair(22, 41), Pair(23, 41), Pair(23, 42), Pair(24, 41))
 
     private var lairLocationX: Int = 47
     private var lairLocationY: Int = 47
@@ -47,7 +45,7 @@ class Simulation(private val sideLength: Int) {
 
         while (true) {
             ants.forEach { ant ->
-                if (Random.nextInt() % 10 == 1) {
+                if (Random.nextInt() % 2 == 1) {
                     ant.moveRandomly(calculateAvailableSquares(ant))
                 } else {
                     ant.move(
@@ -61,7 +59,7 @@ class Simulation(private val sideLength: Int) {
                 updateBoard()
 
                 if ((isAppleEaten(ant) && ant.isSearching())
-                    || (ant.positionX == lairLocationX && ant.positionY == lairLocationY && ant.isReturning())
+                    || (isAntHome(ant) && ant.isReturning())
                 ) {
                     ant.fillPheromoneLevel()
                     ant.swapPheromone()
@@ -77,16 +75,29 @@ class Simulation(private val sideLength: Int) {
     }
 
     private fun isAppleEaten(ant: Ant): Boolean {
-        val location = arrayListOf(
-            Pair(appleLocationX, appleLocationY),
-        )
+        val neighbors = arrayListOf<Pair<Int, Int>>()
+        neighbors.add(Pair(ant.positionX - 1, ant.positionY))
+        neighbors.add(Pair(ant.positionX - 1, ant.positionY - 1))
+        neighbors.add(Pair(ant.positionX - 1, ant.positionY + 1))
+        neighbors.add(Pair(ant.positionX, ant.positionY - 1))
+        neighbors.add(Pair(ant.positionX, ant.positionY + 1))
+        neighbors.add(Pair(ant.positionX + 1, ant.positionY - 1))
+        neighbors.add(Pair(ant.positionX + 1, ant.positionY))
+        neighbors.add(Pair(ant.positionX + 1, ant.positionY + 1))
 
-        for (spot in location) {
-            if (ant.positionX == spot.first && ant.positionY == spot.second) {
+        for (neighbor in neighbors) {
+            if (boardState[neighbor.first][neighbor.second] == appleMark) {
+                if (Random.nextInt() % 100 == 1) {
+                    appleLocations.remove(Pair(neighbor.first, neighbor.second))
+                }
                 return true
             }
         }
         return false
+    }
+
+    private fun isAntHome(ant: Ant): Boolean {
+        return (ant.positionX == lairLocationX) && (ant.positionY == lairLocationY)
     }
 
     private fun calculateAvailableSquares(ant: Ant): MutableMap<Array<Int>, Double> {
@@ -183,7 +194,9 @@ class Simulation(private val sideLength: Int) {
     }
 
     private fun drawApples() {
-        boardState[appleLocationX][appleLocationY] = appleMark
+        appleLocations.forEach {
+            boardState[it.first][it.second] = appleMark
+        }
     }
 
     /**
