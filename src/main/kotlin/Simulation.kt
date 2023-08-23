@@ -6,9 +6,7 @@ class Simulation(private val sideLength: Int) {
     private val boardState = Array(sideLength) { Array(sideLength) { emptyMark } }
     private val delay: Long = 1L
 
-    private var appleLocations: ArrayList<Pair<Int, Int>> =
-        arrayListOf(Pair(20, 20), Pair(21, 20), Pair(22, 20), Pair(20, 21), Pair(20, 22), Pair(23, 20), Pair(21, 21),
-            Pair(21, 40), Pair(21, 41), Pair(22, 41), Pair(23, 41), Pair(23, 42), Pair(24, 41))
+    private var appleLocations: ArrayList<Pair<Int, Int>> = arrayListOf()
 
     private var lairLocationX: Int = 47
     private var lairLocationY: Int = 47
@@ -44,8 +42,10 @@ class Simulation(private val sideLength: Int) {
         gui.isVisible = true
 
         while (true) {
+            spawnApples()
+
             ants.forEach { ant ->
-                if (Random.nextInt() % 2 == 1) {
+                if (Random.nextInt() % 3 == 0) {
                     ant.moveRandomly(calculateAvailableSquares(ant))
                 } else {
                     ant.move(
@@ -58,7 +58,7 @@ class Simulation(private val sideLength: Int) {
 
                 updateBoard()
 
-                if ((isAppleEaten(ant) && ant.isSearching())
+                if (ant.isSearching() && (isAppleEaten(ant))
                     || (isAntHome(ant) && ant.isReturning())
                 ) {
                     ant.fillPheromoneLevel()
@@ -71,6 +71,19 @@ class Simulation(private val sideLength: Int) {
             ants.forEach { ant -> increasePheromoneLevel(ant) }
 
             evaporate()
+        }
+    }
+
+    private fun spawnApples() {
+        if (appleLocations.isEmpty()) {
+            val x = (2..50).random()
+            val y = (2..50).random()
+
+            appleLocations.add(Pair(x, y))
+            appleLocations.add(Pair(x + 1, y))
+            appleLocations.add(Pair(x + 1, y - 1))
+            appleLocations.add(Pair(x, y - 1))
+            appleLocations.add(Pair(x, y + 1))
         }
     }
 
@@ -87,7 +100,7 @@ class Simulation(private val sideLength: Int) {
 
         for (neighbor in neighbors) {
             if (boardState[neighbor.first][neighbor.second] == appleMark) {
-                if (Random.nextInt() % 100 == 1) {
+                if (Random.nextInt() % 10 == 0) {
                     appleLocations.remove(Pair(neighbor.first, neighbor.second))
                 }
                 return true
