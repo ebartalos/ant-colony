@@ -24,8 +24,8 @@ class Simulation(private val sideLength: Int) {
 
 
     init {
-        drawWalls()
         drawApples()
+        drawWalls()
 
         for (i in 1..Constants.MAX_ANTS) {
             ants.add(Ant(Pair(lairLocationX, lairLocationY)))
@@ -45,7 +45,7 @@ class Simulation(private val sideLength: Int) {
             spawnApples()
 
             ants.forEach { ant ->
-                if (Random.nextInt() % 3 == 0) {
+                if (Random.nextInt() % Constants.FREEDOM_DEGREE == 0) {
                     ant.moveRandomly(calculateAvailableSquares(ant))
                 } else {
                     ant.move(
@@ -76,14 +76,16 @@ class Simulation(private val sideLength: Int) {
 
     private fun spawnApples() {
         if (appleLocations.isEmpty()) {
-            val x = (2..50).random()
-            val y = (2..50).random()
+            val x = (2..60).random()
+            val y = (2..60).random()
 
             appleLocations.add(Pair(x, y))
             appleLocations.add(Pair(x + 1, y))
             appleLocations.add(Pair(x + 1, y - 1))
             appleLocations.add(Pair(x, y - 1))
             appleLocations.add(Pair(x, y + 1))
+
+            appleLocations.forEach { println("${it.first}  ${it.second}") }
         }
     }
 
@@ -100,7 +102,7 @@ class Simulation(private val sideLength: Int) {
 
         for (neighbor in neighbors) {
             if (boardState[neighbor.first][neighbor.second] == appleMark) {
-                if (Random.nextInt() % 10 == 0) {
+                if ((Random.nextInt() % Constants.APPLE_BITES) == 0) {
                     appleLocations.remove(Pair(neighbor.first, neighbor.second))
                 }
                 return true
@@ -113,28 +115,28 @@ class Simulation(private val sideLength: Int) {
         return (ant.positionX == lairLocationX) && (ant.positionY == lairLocationY)
     }
 
-    private fun calculateAvailableSquares(ant: Ant): MutableMap<Array<Int>, Double> {
+    private fun calculateAvailableSquares(ant: Ant): MutableMap<Array<Int>, Int> {
         val availableSquares = mutableMapOf(
-            arrayOf(ant.positionX - 1, ant.positionY) to 1.0,
-            arrayOf(ant.positionX, ant.positionY - 1) to 1.0,
-            arrayOf(ant.positionX, ant.positionY + 1) to 1.0,
-            arrayOf(ant.positionX + 1, ant.positionY) to 1.0,
+            arrayOf(ant.positionX - 1, ant.positionY) to 1,
+            arrayOf(ant.positionX, ant.positionY - 1) to 1,
+            arrayOf(ant.positionX, ant.positionY + 1) to 1,
+            arrayOf(ant.positionX + 1, ant.positionY) to 1,
         )
 
         if (Constants.EIGHT_DIMENSIONAL_MOVEMENT) {
-            availableSquares[arrayOf(ant.positionX - 1, ant.positionY - 1)] = 1.0
-            availableSquares[arrayOf(ant.positionX - 1, ant.positionY + 1)] = 1.0
-            availableSquares[arrayOf(ant.positionX + 1, ant.positionY - 1)] = 1.0
-            availableSquares[arrayOf(ant.positionX + 1, ant.positionY + 1)] = 1.0
+            availableSquares[arrayOf(ant.positionX - 1, ant.positionY - 1)] = 1
+            availableSquares[arrayOf(ant.positionX - 1, ant.positionY + 1)] = 1
+            availableSquares[arrayOf(ant.positionX + 1, ant.positionY - 1)] = 1
+            availableSquares[arrayOf(ant.positionX + 1, ant.positionY + 1)] = 1
         }
 
         // remove walls from the equation
         for ((position, _) in availableSquares) {
             if (boardState[position[0]][position[1]] == wallMark) {
-                availableSquares[position] = 0.0
+                availableSquares[position] = 0
             }
         }
-        return availableSquares.filterValues { it != 0.0 } as MutableMap<Array<Int>, Double>
+        return availableSquares.filterValues { it != 0 } as MutableMap<Array<Int>, Int>
     }
 
     private fun evaporate() {
@@ -167,43 +169,6 @@ class Simulation(private val sideLength: Int) {
             boardState[index][0] = wallMark
             boardState[index][sideLength - 1] = wallMark
         }
-
-        boardState[45][45] = wallMark
-        boardState[44][46] = wallMark
-        boardState[44][45] = wallMark
-        boardState[44][47] = wallMark
-        boardState[44][48] = wallMark
-        boardState[44][49] = wallMark
-        boardState[44][50] = wallMark
-        boardState[44][51] = wallMark
-        boardState[44][52] = wallMark
-        boardState[44][53] = wallMark
-        boardState[44][54] = wallMark
-        boardState[44][55] = wallMark
-        boardState[45][55] = wallMark
-        boardState[46][55] = wallMark
-        boardState[47][55] = wallMark
-        boardState[48][55] = wallMark
-        boardState[49][55] = wallMark
-        boardState[50][55] = wallMark
-        boardState[51][55] = wallMark
-
-        boardState[46][45] = wallMark
-        boardState[47][45] = wallMark
-        boardState[48][45] = wallMark
-        boardState[49][45] = wallMark
-        boardState[50][45] = wallMark
-        boardState[51][45] = wallMark
-        boardState[52][45] = wallMark
-        boardState[53][45] = wallMark
-        boardState[54][45] = wallMark
-        boardState[55][45] = wallMark
-        boardState[55][46] = wallMark
-        boardState[55][47] = wallMark
-        boardState[55][48] = wallMark
-        boardState[55][49] = wallMark
-        boardState[55][50] = wallMark
-        boardState[55][51] = wallMark
     }
 
     private fun drawApples() {

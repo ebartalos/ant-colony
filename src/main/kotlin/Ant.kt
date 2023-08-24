@@ -32,14 +32,14 @@ class Ant(spawnPoint: Pair<Int, Int>) {
      * @param pheromoneMap map of attractive pheromone levels
      */
     fun move(
-        availableSquares: MutableMap<Array<Int>, Double>,
+        availableSquares: MutableMap<Array<Int>, Int>,
         pheromoneMap: Array<Array<Int>>
     ) {
         for (square in availableSquares.keys) {
-            availableSquares[square] = pheromoneMap[square[0]][square[1]].toDouble()
+            availableSquares[square] = pheromoneMap[square[0]][square[1]]
         }
 
-        val spot = if (availableSquares.values.all { it == 1.0 }) {
+        val spot = if (availableSquares.values.all { it == 1 }) {
             availableSquares.keys.random()
         } else {
             availableSquares.maxBy { it.value }.key
@@ -54,7 +54,7 @@ class Ant(spawnPoint: Pair<Int, Int>) {
      *
      * @param availableSquares map of available spots
      */
-    fun moveRandomly(availableSquares: MutableMap<Array<Int>, Double>) {
+    fun moveRandomly(availableSquares: MutableMap<Array<Int>, Int>) {
         val spot = availableSquares.keys.random()
 
         positionX = spot[0]
