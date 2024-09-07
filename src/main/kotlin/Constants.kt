@@ -7,8 +7,9 @@ object Constants {
     const val EVAPORATION_RATE = 1
     const val EIGHT_DIMENSIONAL_MOVEMENT = true
 
-    // higher the value, lesser the freedom
+    // Scale 0-10, where 0 is absolute freedom (pheromones are ignored)
+    // and 10 is absolute slavery by pheromones
     const val FREEDOM_DEGREE = 2
 
-    const val APPLE_BITES = 2
+    const val APPLE_BITES = 10
 }

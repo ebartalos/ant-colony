@@ -1,15 +1,17 @@
 import gui.GUI
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.random.Random
 
 class Simulation(private val sideLength: Int) {
     private val boardState = Array(sideLength) { Array(sideLength) { emptyMark } }
     private val delay: Long = 1L
+    private lateinit var gui: GUI
 
-    private var appleLocations: ArrayList<Pair<Int, Int>> = arrayListOf()
+    private val appleLocations: ArrayList<Pair<Int, Int>> = arrayListOf()
 
-    private var lairLocationX: Int = 47
-    private var lairLocationY: Int = 47
+    private val lairLocationX: Int = 47
+    private val lairLocationY: Int = 47
 
     private val emptyMark = 0
     private val wallMark = 1
@@ -26,51 +28,63 @@ class Simulation(private val sideLength: Int) {
     init {
         drawApples()
         drawWalls()
-
-        for (i in 1..Constants.MAX_ANTS) {
-            ants.add(Ant(Pair(lairLocationX, lairLocationY)))
-        }
-
+        addAnts()
         updateBoard()
+        initGUI()
     }
 
     /**
      * Play the ant colony simulation.
      */
     fun play() {
-        val gui = GUI(boardState)
-        gui.isVisible = true
-
         while (true) {
             spawnApples()
 
             ants.forEach { ant ->
-                if (Random.nextInt() % Constants.FREEDOM_DEGREE == 0) {
-                    ant.moveRandomly(calculateAvailableSquares(ant))
-                } else {
-                    ant.move(
-                        calculateAvailableSquares(ant),
-                        if (ant.isSearching()) pheromoneMapReturning else pheromoneMapSearching
-                    )
-                }
-
+                resolveMovement(ant)
                 ant.decreasePheromoneProduction()
-
                 updateBoard()
-
-                if (ant.isSearching() && (isAppleEaten(ant))
-                    || (isAntHome(ant) && ant.isReturning())
-                ) {
-                    ant.fillPheromoneLevel()
-                    ant.swapPheromone()
-                }
+                resolvePheromones(ant)
             }
-            gui.update(boardState)
-            Thread.sleep(delay)
 
-            ants.forEach { ant -> increasePheromoneLevel(ant) }
-
+            increasePheromoneLevelForAllAnts()
             evaporate()
+
+            updateGUI()
+        }
+    }
+
+    private fun initGUI() {
+        gui = GUI(boardState)
+        gui.isVisible = true
+    }
+
+    private fun updateGUI() {
+        gui.update(boardState)
+        Thread.sleep(delay)
+    }
+
+    private fun increasePheromoneLevelForAllAnts() {
+        ants.forEach { ant -> increasePheromoneLevel(ant) }
+    }
+
+    private fun resolveMovement(ant: Ant) {
+        if (abs(Random.nextInt() % 10) > Constants.FREEDOM_DEGREE) {
+            ant.moveRandomly(calculateAvailableSquares(ant))
+        } else {
+            ant.move(
+                calculateAvailableSquares(ant),
+                if (ant.isSearching()) pheromoneMapReturning else pheromoneMapSearching
+            )
+        }
+    }
+
+    private fun resolvePheromones(ant: Ant) {
+        if (ant.isSearching() && (isAppleEaten(ant))
+            || (isAntHome(ant) && ant.isReturning())
+        ) {
+            ant.fillPheromoneLevel()
+            ant.swapPheromone()
         }
     }
 
@@ -84,8 +98,6 @@ class Simulation(private val sideLength: Int) {
             appleLocations.add(Pair(x + 1, y - 1))
             appleLocations.add(Pair(x, y - 1))
             appleLocations.add(Pair(x, y + 1))
-
-            appleLocations.forEach { println("${it.first}  ${it.second}") }
         }
     }
 
@@ -201,5 +213,11 @@ class Simulation(private val sideLength: Int) {
             }
         }
         boardState[lairLocationX][lairLocationY] = lairMark
+    }
+
+    private fun addAnts() {
+        for (i in 1..Constants.MAX_ANTS) {
+            ants.add(Ant(Pair(lairLocationX, lairLocationY)))
+        }
     }
 }
